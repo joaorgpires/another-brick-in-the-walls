@@ -10,7 +10,8 @@ import Breakout.AtomicDefinitions
 
 -- | render all entities into a picture
 render :: GameState -> Picture
-render (GameState bar ball score blocks) = pictures (map renderEnt (bar:ball:score:blocks))
+render (GameState bar ball score blocks)
+  = pictures (map renderEnt (bar:ball:score:blocks))
 
 
 -- | render a single entity

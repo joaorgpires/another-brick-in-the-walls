@@ -33,9 +33,9 @@ advanceEnt dt (Bar, mov) = (Bar,advanceCoords dt (barW / 2) mov)
 stop :: GameState -> GameState
 stop (GameState bar ball score other)
   = GameState bar' ball' score other
-  where (Bar,((x,y),(_,_))) = bar
+  where (Bar,((x,y),(_,_)))    = bar
         (Ball,((x',y'),(_,_))) = ball
-        bar' = (Bar,((x,y),(0,0)))
+        bar'  = (Bar,((x,y),(0,0)))
         ball' = (Ball,((x',y'),(0,0)))
 
 -- | advance all game entities by a time delta
@@ -56,10 +56,10 @@ collisions :: GameState -> GameState
 collisions (GameState bar ball score other)
   = GameState bar ball' score other
   where (Ball,((x,y),(dx,dy))) = ball
-        (Bar,((_,y'),(_,_))) = bar
+        (Bar,((_,y'),(_,_)))   = bar
         ball'
           | ball `hits` bar = (Ball,((x,y'+1/2*barH+ballRadius),(dx,-dy)))
-          | otherwise = (Ball,((x,y),(dx,dy)))
+          | otherwise       = (Ball,((x,y),(dx,dy)))
 
 
 -- | check colision between two entities
@@ -83,9 +83,8 @@ react (EventKey (SpecialKey KeyRight) keystate _ _) (GameState bar ball score bl
         dx'  = if keystate==Down then 150 else 0
         bar' = (Bar, (pos, (dx', dy)))
 -- ignore all other keys and events
-react (EventKey (Char 'n') Down _ _) _
-  = initialState []
-react _ world = world
+react (EventKey (Char 'n') Down _ _) _ = initialState []
+react _ world                          = world
 
 -- | frames per second for game event loop
 fps :: Int
