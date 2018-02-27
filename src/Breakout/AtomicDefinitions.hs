@@ -9,20 +9,22 @@ import Graphics.Gloss
 
 -- | representation for the game state;
 -- player's bar plus ball plus list of lists of blocks
-data GameState = GameState Entity Entity [Entity]
-
-type Entity = (Shape, Coords)
+data GameState = GameState Entity Entity Entity [Entity]
 
 data Shape = Bar -- ^ bar
           | Ball -- ^ ball
           | Block Point -- ^ block (position)
-
+          | Score Int
 
 -- | coordinates for movement calculations
--- position, velocity vector, angular velocity
+-- position, velocity vector
 type Coords = (Point,      -- ^ center position
                Vector     -- ^ linear velocity
               )
+
+type Entity     = (Shape, Coords)
+
+type Dimensions = (Float, Float) -- dimensions for blocks
 
 -- | objects dimensions
 ballRadius, barW, barH :: Float

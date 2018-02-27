@@ -11,7 +11,7 @@ import Breakout.AtomicDefinitions
 import Breakout.Renderer
 
 loseState :: GameState -> Bool
-loseState (GameState bar ball blocks)
+loseState (GameState bar ball _ _)
   = y'+ballRadius < y-1/2*barH
   where (Bar,((_,y),(_,_))) = bar
         (Ball,((_',y'),(_,_))) = ball
