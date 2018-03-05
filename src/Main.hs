@@ -12,9 +12,9 @@ import Breakout.AtomicDefinitions
 import Breakout.Renderer
 import Breakout.Scoring
 
--- | advance coordinates by a time delta
-advanceCoords :: Float -> Float -> Coords -> Coords
-advanceCoords dt radius ((x,y),(dx,dy))
+-- | advance ball coordinates by a time delta
+advanceBall :: Float -> Float -> Coords -> Coords
+advanceBall dt radius ((x,y),(dx,dy))
   = ((x',y'),(dx',dy'))
   where (x',dx') = clip x dx (maxWidth-radius)
         (y',dy') = clip y dy (maxHeight-radius)
@@ -25,10 +25,23 @@ advanceCoords dt radius ((x,y),(dx,dy))
           | otherwise = (h',dh)
           where h' = h + dt*dh
 
+-- | advance bar coordinates by a time delta
+advanceBar :: Float -> Float -> Coords -> Coords
+advanceBar dt radius ((x,y),(dx,dy))
+  = ((x',y'),(dx',dy'))
+  where (x',dx') = clip x dx (maxWidth-radius)
+        (y',dy') = clip y dy (maxHeight-radius)
+        -- clip to a bounding interval
+        clip h dh max
+          | h' > max  = (max,0)
+          | h' < -max = (-max,0)
+          | otherwise = (h',dh)
+          where h' = h + dt*dh
+
 -- | advance an entity by a time delta
 advanceEnt :: Float -> Entity -> Entity
-advanceEnt dt (Ball,mov) = (Ball,advanceCoords dt ballRadius mov)
-advanceEnt dt (Bar, mov) = (Bar,advanceCoords dt (barW / 2) mov)
+advanceEnt dt (Ball,mov) = (Ball,advanceBall dt ballRadius mov)
+advanceEnt dt (Bar, mov) = (Bar,advanceBar dt (barW / 2) mov)
 
 stop :: GameState -> GameState
 stop (GameState bar ball score other)
