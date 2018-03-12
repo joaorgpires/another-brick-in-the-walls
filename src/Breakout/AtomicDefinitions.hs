@@ -6,14 +6,15 @@
 module Breakout.AtomicDefinitions where
 
 import Graphics.Gloss
+import qualified Data.Map.Lazy as Map
 
 -- | representation for the game state;
 -- player's bar plus ball plus list of lists of blocks
-data GameState = GameState Entity Entity Entity [Entity]
+data GameState = GameState Entity Entity Entity Blocks
 
 data Shape = Bar -- ^ bar
           | Ball -- ^ ball
-          | Block Point -- ^ block (position)
+          | Block Float -- ^ block (position)
           | Score Int
 
 -- | coordinates for movement calculations
@@ -26,17 +27,21 @@ type Entity     = (Shape, Coords)
 
 type Dimensions = (Float, Float) -- dimensions for blocks
 
+type Blocks = Map.Map Float [Entity]
+
 -- | objects dimensions
-ballRadius, barW, barH :: Float
+ballRadius, barW, barH, blockW, blockH :: Float
 ballRadius = 10
 barW       = 80
 barH       = 20
+blockW     = 80
+blockH     = 20
 
 -- | objects as pictures
 bar, ball, block :: Picture
 bar   = rectangleSolid barW barH
 ball  = circleSolid ballRadius
-block = rectangleSolid 80 20
+block = rectangleSolid blockW blockH
 
 -- | display dimensions
 maxWidth, maxHeight :: Float

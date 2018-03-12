@@ -7,6 +7,7 @@ module Main where
 
 import Graphics.Gloss
 import Graphics.Gloss.Interface.Pure.Game
+import qualified Data.Map.Lazy as Map
 
 import Breakout.AtomicDefinitions
 import Breakout.Renderer
@@ -87,16 +88,16 @@ react :: Event -> GameState -> GameState
 react (EventKey (SpecialKey KeyLeft) keystate _ _) (GameState bar ball score blocks)
   = GameState bar' ball score blocks
   where (Bar, (pos,(_,dy))) = bar
-        dx'  = if keystate==Down then -150 else 0
+        dx'  = if keystate==Down then -200 else 0
         bar' = (Bar, (pos, (dx',dy)))
 
 react (EventKey (SpecialKey KeyRight) keystate _ _) (GameState bar ball score blocks)
   = GameState bar' ball score blocks
   where (Bar, (pos, (_,dy))) = bar
-        dx'  = if keystate==Down then 150 else 0
+        dx'  = if keystate==Down then 200 else 0
         bar' = (Bar, (pos, (dx', dy)))
 -- ignore all other keys and events
-react (EventKey (Char 'n') Down _ _) _ = initialState []
+react (EventKey (Char 'n') Down _ _) _ = initialState (Map.empty)
 react _ world                          = world
 
 -- | frames per second for game event loop
@@ -104,17 +105,36 @@ fps :: Int
 fps = 60
 
 -- | initial game state
-initialState :: [Entity] -> GameState
+initialState :: Blocks -> GameState
 initialState blocks = GameState bar ball score blocks
   where
     bar   = (Bar, ((0,-350), (0,0)))
-    ball  = (Ball, ((0,-330), (80,80)))
+    ball  = (Ball, ((0,-330), (120,120)))
     score = (Score 0, ((600,-390),(0,0)))
+
+getBlock :: Float -> Float -> Float -> Entity
+getBlock row x y
+  = (Block row, ((x,y),(0,0)))
+
+myFloor :: Float -> Int
+myFloor x = floor x
+
+genRow :: Float -> [Entity]
+genRow row = map (\x -> getBlock row x y) [-maxWidth + blockSize / 2, -maxWidth + blockSize + intervalSize + blockSize / 2..maxWidth]
+  where y             = 175 + row * 50
+        blockSize     = row * blockW
+        nblocks       = myFloor (2*maxWidth / blockSize - 1)
+        intervalSize  = (2*maxWidth - fromIntegral nblocks*blockSize) / (fromIntegral nblocks - 1)
+
+genBlocks :: Float -> Blocks
+genBlocks 0 = Map.empty
+genBlocks n = Map.insert n (genRow n) (genBlocks (n - 0.5))
+
 
 -- | main entry point
 main :: IO ()
 main = do
- play window black fps (initialState []) render react update
+ play window black fps (initialState (genBlocks 3)) render react update
 
 window :: Display
 window = InWindow "Breakout" (2*round maxWidth,2*round maxHeight) (0,0)
