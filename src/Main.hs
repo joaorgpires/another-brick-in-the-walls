@@ -64,22 +64,32 @@ update :: Float -> GameState -> GameState -- Change this afterwards
 update dt game
   = collisions (advance dt game)
 
+-- | blocks collisions
+blocksCollisions :: Entity -> Blocks -> Blocks
+blocksCollisions ball blocks
+  | not (or (map (\z -> ball `hits` z) (blocksToList blocks))) = blocks
+  | otherwise = Map.empty
+  where (Ball,((x,y),_)) = ball
 
 -- | collision detection
 collisions :: GameState -> GameState
-collisions (GameState bar ball score other)
-  = GameState bar ball' score other
+collisions (GameState bar ball score blocks)
+  = GameState bar ball' score blocks'
   where (Ball,((x,y),(dx,dy))) = ball
         (Bar,((_,y'),(_,_)))   = bar
         ball'
-          | ball `hits` bar = (Ball,((x,y'+1/2*barH+ballRadius),(dx,-dy)))
-          | otherwise       = (Ball,((x,y),(dx,dy)))
+          | ball `hits` bar                                      = (Ball,((x,y'+1/2*barH+ballRadius),(dx,-dy)))
+          | or (map (\z -> ball `hits` z) (blocksToList blocks)) = (Ball,((x,y),(dx,-dy)))
+          | otherwise                                            = (Ball,((x,y),(dx,dy)))
+        blocks' = blocksCollisions ball blocks
 
 
 -- | check colision between two entities
 hits :: Entity -> Entity -> Bool
 hits (Ball,((x,y),_)) (Bar,((x',y'),_))
   = (ballRadius+1/2*barH >= y-y') && (x'-1/2*barW <= x) && (x <= x'+1/2*barW) -- == not working for some reason? does it have to do with dt?
+hits (Ball,((x,y),_)) (Block row,((x',y'),_))
+  = (ballRadius+1/2*blockH >= y'-y) && (x'-1/2*blockW*row <= x) && (x <= x'+1/2*blockW*row)
 hits _ _ = False
 
 -- | react to keyboard events

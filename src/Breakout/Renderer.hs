@@ -31,4 +31,4 @@ renderShape (Score s) = color white (scale 0.15 0.15 (text txt))
   where txt = "Score: " ++ show(s)
 
 blocksToList :: Blocks -> [Entity]
-blocksToList blocks = concat (map (\(x,y) -> y) (Map.toList blocks))
+blocksToList blocks = concat (map (\(_,y) -> y) (Map.toList blocks))
