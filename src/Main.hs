@@ -55,9 +55,10 @@ stop (GameState bar ball score other)
 
 -- | advance all game entities by a time delta
 advance :: Float -> GameState -> GameState
-advance dt (GameState bar ball score other)
-  | loseState (GameState bar ball score other) = stop (GameState bar ball score other)
-  | otherwise = GameState (advanceEnt dt bar) (advanceEnt dt ball) score other
+advance dt (GameState bar ball score blocks)
+  | loseState (GameState bar ball score blocks) = stop (GameState bar ball score blocks)
+  | Map.null blocks = stop (GameState bar ball score blocks)
+  | otherwise       = GameState (advanceEnt dt bar) (advanceEnt dt ball) score blocks
 
 -- | update the game state;
 -- time delta, decay laser and check for colitions
@@ -70,14 +71,20 @@ blocksCollisions :: Entity -> Blocks -> Blocks
 blocksCollisions ball blocks
   | not (or (map (\z -> ball `hits` z) (blocksToList blocks))) = blocks
   | otherwise = if length blockList == 1 then Map.delete yblock blocks
-                else blocks'
-  where (Ball,((_,y),_)) = ball
-        (yblock, blockList)  = Maybe.fromJust (Map.lookupGE (y-1/2*blockH - ballRadius)  blocks)
-        f _                  = Just blockList'
-        blocks'              = Map.update f yblock blocks
-        blockList'           = removeBlock blockList
-        removeBlock []       = []
-        removeBlock (el:lst) = if ball `hits` el then lst
+                else blocks''
+  where (Ball,((_,y),_))       = ball
+        (yblock,blockList)     = Maybe.fromJust (Map.lookupGE (y-1/2*blockH - ballRadius)  blocks)
+        (yblockUp,blockListUp) = if (Maybe.isJust (Map.lookupGE y blocks)) then Maybe.fromJust (Map.lookupGE y blocks)
+                                 else (y,[])
+        f _                    = Just blockList'
+        blocks'                = Map.update f yblock blocks
+        blockList'             = removeBlock blockList
+        f' _                   = Just blockListUp'
+        blocks''               = if (null blockListUp) then blocks'
+                                 else Map.update f' yblockUp blocks'
+        blockListUp'           = removeBlock blockListUp
+        removeBlock []         = []
+        removeBlock (el:lst)   = if ball `hits` el then removeBlock(lst)
                                else el:(removeBlock lst)
 
 -- | collision detection
@@ -147,7 +154,7 @@ genRow row = (y, map (\x -> getBlock row x y) [-maxWidth + blockSize / 2, -maxWi
 
 genBlocks :: Float -> Blocks
 genBlocks 0 = Map.empty
-genBlocks n = Map.insert y blockList (genBlocks (n - 0.5))
+genBlocks n = Map.insert y blockList (genBlocks (n - 1))
     where (y, blockList) = genRow n
 
 
