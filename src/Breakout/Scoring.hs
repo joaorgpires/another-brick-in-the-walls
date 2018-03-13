@@ -15,3 +15,6 @@ loseState (GameState bar ball _ _)
   = y'+ballRadius < y-1/2*barH
   where (Bar,((_,y),(_,_)))    = bar
         (Ball,((_',y'),(_,_))) = ball
+
+scoreBlock :: Entity -> Int
+scoreBlock (Block row, (_,_)) = round ((3.5 - row)*fromIntegral baseScore)

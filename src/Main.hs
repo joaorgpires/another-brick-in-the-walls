@@ -67,38 +67,42 @@ update dt game
   = collisions (advance dt game)
 
 -- | blocks collisions
-blocksCollisions :: Entity -> Blocks -> Blocks
-blocksCollisions ball blocks
-  | not (or (map (\z -> ball `hits` z) (blocksToList blocks))) = blocks
-  | otherwise = if length blockList == 1 then Map.delete yblock blocks
-                else blocks''
+blocksCollisions :: Int -> Entity -> Blocks -> (Int,Blocks)
+blocksCollisions score ball blocks
+  | not (or (map (\z -> ball `hits` z) (blocksToList blocks))) = (score,blocks)
+  | otherwise = if (length blockList == 1 && ball `hits` (head blockList)) then (score + scoreBlock (head blockList),Map.delete yblock blocks)
+                else (sc,blocks'')
   where (Ball,((_,y),_))             = ball
         (yblock,blockList)           = Maybe.fromJust (Map.lookupGE (y-1/2*blockH - ballRadius)  blocks)
         (yblockAbove,blockListAbove) = if (Maybe.isJust (Map.lookupGE y blocks)) then Maybe.fromJust (Map.lookupGE y blocks)
                                        else (y,[])
         f _                          = Just blockList'
         blocks'                      = Map.update f yblock blocks
-        blockList'                   = removeBlock blockList
+        (score',blockList')          = removeBlock score blockList
         f' _                         = Just blockListAbove'
-        blocks''                     = if (null blockListAbove) then blocks'
+        blocks''                     = if (null blockListAbove) || (yblock == yblockAbove) then blocks'
                                        else Map.update f' yblockAbove blocks'
-        blockListAbove'              = removeBlock blockListAbove
-        removeBlock []               = []
-        removeBlock (el:lst)         = if ball `hits` el then removeBlock(lst)
-                                       else el:(removeBlock lst)
+        (score'',blockListAbove')    = removeBlock score' blockListAbove
+        sc                           = if (null blockListAbove) || (yblock == yblockAbove) then score'
+                                       else score''
+        removeBlock s []             = (s, [])
+        removeBlock s (el:lst)       = if ball `hits` el then removeBlock (s + (scoreBlock el)) lst
+                                       else (sc',el:lst')
+                                          where (sc',lst') = removeBlock s lst
 
 -- | collision detection
 collisions :: GameState -> GameState
 collisions (GameState bar ball score blocks)
-  = GameState bar ball' score blocks'
-  where (Ball,((x,y),(dx,dy))) = ball
-        (Bar,((_,y'),(_,_)))   = bar
+  = GameState bar ball' score' blocks'
+  where (Ball,((x,y),(dx,dy)))        = ball
+        (Bar,((_,y'),(_,_)))          = bar
+        (Score s,((sx,sy),(sdx,sdy))) = score
         ball'
           | ball `hits` bar                                      = (Ball,((x,y'+1/2*barH+ballRadius),(dx,-dy)))
           | or (map (\z -> ball `hits` z) (blocksToList blocks)) = (Ball,((x,y),(dx,-dy)))
           | otherwise                                            = (Ball,((x,y),(dx,dy)))
-        blocks' = blocksCollisions ball blocks
-
+        (s',blocks') = blocksCollisions s ball blocks
+        score' = (Score s',((sx,sy),(sdx,sdy)))
 
 -- | check colision between two entities
 hits :: Entity -> Entity -> Bool
@@ -123,7 +127,7 @@ react (EventKey (SpecialKey KeyRight) keystate _ _) (GameState bar ball score bl
         dx'  = if keystate==Down then 300 else 0
         bar' = (Bar, (pos, (dx', dy)))
 -- ignore all other keys and events
-react (EventKey (Char 'n') Down _ _) _ = initialState (Map.empty)
+react (EventKey (Char 'n') Down _ _) _ = initialState (genBlocks 2.5)
 react _ world                          = world
 
 -- | frames per second for game event loop
@@ -147,21 +151,21 @@ myFloor x = floor x
 
 genRow :: Float -> (Float, [Entity])
 genRow row = (y, map (\x -> getBlock row x y) [-maxWidth + blockSize / 2, -maxWidth + blockSize + intervalSize + blockSize / 2..maxWidth])
-  where y             = -75 + row * 50
+  where y             = maxHeight - 225 - row * 50
         blockSize     = row * blockW
         nblocks       = myFloor (2*maxWidth / blockSize - 1)
         intervalSize  = (2*maxWidth - fromIntegral nblocks*blockSize) / (fromIntegral nblocks - 1)
 
 genBlocks :: Float -> Blocks
 genBlocks 0 = Map.empty
-genBlocks n = Map.insert y blockList (genBlocks (n - 1))
-    where (y, blockList) = genRow n
+genBlocks n = Map.insert y blockList (genBlocks (n - 0.5))
+  where (y, blockList) = genRow n
 
 
 -- | main entry point
 main :: IO ()
 main = do
- play window black fps (initialState (genBlocks 2)) render react update
+ play window black fps (initialState (genBlocks 2.5)) render react update
 
 window :: Display
 window = InWindow "Breakout" (2*round maxWidth,2*round maxHeight) (0,0)

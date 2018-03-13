@@ -12,10 +12,12 @@ import qualified Data.Map.Lazy as Map
 -- player's bar plus ball plus list of lists of blocks
 data GameState = GameState Entity Entity Entity Blocks
 
-data Shape = Bar -- ^ bar
-          | Ball -- ^ ball
-          | Block Float -- ^ block (position)
-          | Score Int
+data Shape = Bar        -- ^ bar
+          | Ball        -- ^ ball
+          | Block Float -- ^ block (type)
+          | Score Int   -- ^ score
+          | Level Int   -- ^ level
+          | Lives Int   -- ^ number of lives, initially 3
 
 -- | coordinates for movement calculations
 -- position, velocity vector
@@ -36,6 +38,10 @@ barW       = 80
 barH       = 20
 blockW     = 80
 blockH     = 20
+
+-- | base score
+baseScore :: Int
+baseScore = 10
 
 -- | objects as pictures
 bar, ball, block :: Picture
