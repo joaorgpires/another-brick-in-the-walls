@@ -9,8 +9,8 @@ import Graphics.Gloss
 import qualified Data.Map.Lazy as Map
 
 -- | representation for the game state;
--- player's bar plus ball plus list of lists of blocks
-data GameState = GameState Entity Entity Entity Blocks
+-- player's bar ball score level lives map of (y, blocks centered with yvalue = y)
+data GameState = GameState Entity Entity Entity Entity Entity Blocks
 
 data Shape = Bar        -- ^ bar
           | Ball        -- ^ ball
