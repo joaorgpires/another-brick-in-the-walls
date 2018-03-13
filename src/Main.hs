@@ -46,8 +46,8 @@ advanceEnt dt (Ball,mov) = (Ball,advanceBall dt ballRadius mov)
 advanceEnt dt (Bar, mov) = (Bar,advanceBar dt (barW / 2) mov)
 
 stop :: GameState -> GameState
-stop (GameState bar ball score other)
-  = GameState bar' ball' score other
+stop (GameState bar ball score level lives blocks)
+  = GameState bar' ball' score level lives blocks
   where (Bar,((x,y),(_,_)))    = bar
         (Ball,((x',y'),(_,_))) = ball
         bar'  = (Bar,((x,y),(0,0)))
@@ -55,14 +55,20 @@ stop (GameState bar ball score other)
 
 -- | advance all game entities by a time delta
 advance :: Float -> GameState -> GameState
-advance dt (GameState bar ball score blocks)
-  | loseState (GameState bar ball score blocks) = stop (GameState bar ball score blocks)
-  | Map.null blocks = stop (GameState bar ball score blocks)
-  | otherwise       = GameState (advanceEnt dt bar) (advanceEnt dt ball) score blocks
-
+advance dt (GameState bar ball score level lives blocks)
+  | loseState (GameState bar ball score level lives blocks) = if (liv == 0 || liv == 1) then stop (GameState bar ball score level lives' blocks)
+                                                              else initialState sc lev (liv - 1) blocks
+  | Map.null blocks = if lev == 5 then stop (GameState bar ball score level lives blocks)
+                      else initialState sc (lev + 1) liv (genBlocks 2.5)
+  | otherwise       = GameState (advanceEnt dt bar) (advanceEnt dt ball) score level lives blocks
+  where (Score sc,_)                            = score
+        (Level lev,_) = level
+        (Lives liv,((livx,livy),(livdx,livdy))) = lives
+        lives' = (Lives 0,((livx,livy),(livdx,livdy)))
+        
 -- | update the game state;
 -- time delta, decay laser and check for colitions
-update :: Float -> GameState -> GameState -- Change this afterwards
+update :: Float -> GameState -> GameState
 update dt game
   = collisions (advance dt game)
 
@@ -92,17 +98,21 @@ blocksCollisions score ball blocks
 
 -- | collision detection
 collisions :: GameState -> GameState
-collisions (GameState bar ball score blocks)
-  = GameState bar ball' score' blocks'
-  where (Ball,((x,y),(dx,dy)))        = ball
-        (Bar,((_,y'),(_,_)))          = bar
-        (Score s,((sx,sy),(sdx,sdy))) = score
+collisions (GameState bar ball score level lives blocks)
+  = GameState bar ball' score' level lives' blocks'
+  where (Ball,((x,y),(dx,dy)))                  = ball
+        (Bar,((_,y'),(_,_)))                    = bar
+        (Score s,((sx,sy),(sdx,sdy)))           = score
+        (Lives liv,((livx,livy),(livdx,livdy))) = lives
         ball'
           | ball `hits` bar                                      = (Ball,((x,y'+1/2*barH+ballRadius),(dx,-dy)))
           | or (map (\z -> ball `hits` z) (blocksToList blocks)) = (Ball,((x,y),(dx,-dy)))
           | otherwise                                            = (Ball,((x,y),(dx,dy)))
         (s',blocks') = blocksCollisions s ball blocks
         score' = (Score s',((sx,sy),(sdx,sdy)))
+        lives' = if (s' /= s && (myFloor (fromIntegral s/1500)) /= (myFloor (fromIntegral s'/1500))) then (Lives (liv+1),((livx,livy),(livdx,livdy)))
+                 else lives
+        
 
 -- | check colision between two entities
 hits :: Entity -> Entity -> Bool
@@ -115,19 +125,19 @@ hits _ _ = False
 -- | react to keyboard events
 react :: Event -> GameState -> GameState
 -- move bar (left/right)
-react (EventKey (SpecialKey KeyLeft) keystate _ _) (GameState bar ball score blocks)
-  = GameState bar' ball score blocks
+react (EventKey (SpecialKey KeyLeft) keystate _ _) (GameState bar ball score level lives blocks)
+  = GameState bar' ball score level lives blocks
   where (Bar, (pos,(_,dy))) = bar
         dx'  = if keystate==Down then -300 else 0
         bar' = (Bar, (pos, (dx',dy)))
 
-react (EventKey (SpecialKey KeyRight) keystate _ _) (GameState bar ball score blocks)
-  = GameState bar' ball score blocks
+react (EventKey (SpecialKey KeyRight) keystate _ _) (GameState bar ball score level lives blocks)
+  = GameState bar' ball score level lives blocks
   where (Bar, (pos, (_,dy))) = bar
         dx'  = if keystate==Down then 300 else 0
         bar' = (Bar, (pos, (dx', dy)))
 -- ignore all other keys and events
-react (EventKey (Char 'n') Down _ _) _ = initialState (genBlocks 2.5)
+react (EventKey (Char 'n') Down _ _) _ = initialState 0 1 3 (genBlocks 2.5)
 react _ world                          = world
 
 -- | frames per second for game event loop
@@ -135,12 +145,14 @@ fps :: Int
 fps = 60
 
 -- | initial game state
-initialState :: Blocks -> GameState
-initialState blocks = GameState bar ball score blocks
+initialState :: Int -> Int -> Int -> Blocks -> GameState
+initialState sc lev liv blocks = GameState bar ball score level lives blocks
   where
     bar   = (Bar, ((0,-350), (0,0)))
-    ball  = (Ball, ((0,-330), (150,150)))
-    score = (Score 0, ((600,-390),(0,0)))
+    ball  = (Ball, ((0,-330), (180,180)))
+    score = (Score sc, ((600,-390),(0,0)))
+    level = (Level lev, ((0,-390),(0,0)))
+    lives = (Lives liv, ((-600,-390),(0,0)))
 
 getBlock :: Float -> Float -> Float -> Entity
 getBlock row x y
@@ -165,7 +177,7 @@ genBlocks n = Map.insert y blockList (genBlocks (n - 0.5))
 -- | main entry point
 main :: IO ()
 main = do
- play window black fps (initialState (genBlocks 2.5)) render react update
+ play window black fps (initialState 0 5 3 (genBlocks 2.5)) render react update
 
 window :: Display
 window = InWindow "Breakout" (2*round maxWidth,2*round maxHeight) (0,0)
