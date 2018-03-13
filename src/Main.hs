@@ -72,20 +72,20 @@ blocksCollisions ball blocks
   | not (or (map (\z -> ball `hits` z) (blocksToList blocks))) = blocks
   | otherwise = if length blockList == 1 then Map.delete yblock blocks
                 else blocks''
-  where (Ball,((_,y),_))       = ball
-        (yblock,blockList)     = Maybe.fromJust (Map.lookupGE (y-1/2*blockH - ballRadius)  blocks)
-        (yblockUp,blockListUp) = if (Maybe.isJust (Map.lookupGE y blocks)) then Maybe.fromJust (Map.lookupGE y blocks)
-                                 else (y,[])
-        f _                    = Just blockList'
-        blocks'                = Map.update f yblock blocks
-        blockList'             = removeBlock blockList
-        f' _                   = Just blockListUp'
-        blocks''               = if (null blockListUp) then blocks'
-                                 else Map.update f' yblockUp blocks'
-        blockListUp'           = removeBlock blockListUp
-        removeBlock []         = []
-        removeBlock (el:lst)   = if ball `hits` el then removeBlock(lst)
-                               else el:(removeBlock lst)
+  where (Ball,((_,y),_))             = ball
+        (yblock,blockList)           = Maybe.fromJust (Map.lookupGE (y-1/2*blockH - ballRadius)  blocks)
+        (yblockAbove,blockListAbove) = if (Maybe.isJust (Map.lookupGE y blocks)) then Maybe.fromJust (Map.lookupGE y blocks)
+                                       else (y,[])
+        f _                          = Just blockList'
+        blocks'                      = Map.update f yblock blocks
+        blockList'                   = removeBlock blockList
+        f' _                         = Just blockListAbove'
+        blocks''                     = if (null blockListAbove) then blocks'
+                                       else Map.update f' yblockAbove blocks'
+        blockListAbove'              = removeBlock blockListAbove
+        removeBlock []               = []
+        removeBlock (el:lst)         = if ball `hits` el then removeBlock(lst)
+                                       else el:(removeBlock lst)
 
 -- | collision detection
 collisions :: GameState -> GameState
