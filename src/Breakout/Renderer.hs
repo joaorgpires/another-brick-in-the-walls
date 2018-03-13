@@ -12,8 +12,8 @@ import qualified Data.Map.Lazy as Map
 
 -- | render all entities into a picture
 render :: GameState -> Picture
-render (GameState bar ball score blocks)
-  = pictures (map renderEnt (bar:ball:score:(blocksToList blocks)))
+render (GameState bar ball score level lives blocks)
+  = pictures (map renderEnt (bar:ball:score:level:lives:(blocksToList blocks)))
 
 
 -- | render a single entity
@@ -29,6 +29,10 @@ renderShape Ball      = color green ball
 renderShape (Block x) = color white (scale x 1 block)
 renderShape (Score s) = color white (scale 0.15 0.15 (text txt))
   where txt = "Score: " ++ show(s)
+renderShape (Level l) = color white (scale 0.15 0.15 (text txt))
+  where txt = "Level: " ++ show(l)
+renderShape (Lives l) = color white (scale 0.15 0.15 (text txt))
+  where txt = "Lives: " ++ show(l)
 
 blocksToList :: Blocks -> [Entity]
 blocksToList blocks = concat (map (\(_,y) -> y) (Map.toList blocks))
