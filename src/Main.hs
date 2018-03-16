@@ -15,9 +15,9 @@ import Breakout.Renderer
 import Breakout.Scoring
 
 -- | advance ball coordinates by a time delta
-advanceBall :: Float -> Float -> Coords -> Coords
-advanceBall dt radius ((x,y),(dx,dy))
-  = ((x',y'),(dx',dy'))
+advanceBall :: State -> Float -> Float -> Coords -> Coords
+advanceBall state dt radius ((x,y),(dx,dy))
+  = if isNew state then advanceBar dt (barW / 2) ((x,y),(dx,dy)) else ((x',y'),(dx',dy'))
   where (x',dx') = clip x dx (maxWidth-radius)
         (y',dy') = clip y dy (maxHeight-radius)
         -- clip to a bounding interval -- from gloss-demo example
@@ -41,9 +41,9 @@ advanceBar dt radius ((x,y),(dx,dy))
           where h' = h + dt*dh
 
 -- | advance an entity by a time delta
-advanceEnt :: Float -> Entity -> Entity
-advanceEnt dt (Ball,mov) = (Ball,advanceBall dt ballRadius mov)
-advanceEnt dt (Bar, mov) = (Bar,advanceBar dt (barW / 2) mov)
+advanceEnt :: State -> Float -> Entity -> Entity
+advanceEnt state dt (Ball,mov) = (Ball,advanceBall state dt ballRadius mov)
+advanceEnt _ dt (Bar, mov)     = (Bar,advanceBar dt (barW / 2) mov)
 
 stop :: GameState -> GameState
 stop (GameState bar ball score level lives blocks state)
@@ -60,7 +60,7 @@ advance dt (GameState bar ball score level lives blocks state)
                                                                     else initialState (getVelocity lev) sc lev (liv - 1) blocks
   | Map.null blocks = if lev == 5 then stop (GameState bar ball score level lives blocks state)
                       else initialState (getVelocity (lev+1)) sc (lev + 1) liv (genBlocks (lev+1) 2.5)
-  | otherwise       = GameState (advanceEnt dt bar) (advanceEnt dt ball) score level lives blocks state
+  | otherwise       = GameState (advanceEnt state dt bar) (advanceEnt state dt ball) score level lives blocks state
   where (Score sc,_)                            = score
         (Level lev,_) = level
         (Lives liv,((livx,livy),(livdx,livdy))) = lives
@@ -133,17 +133,18 @@ isNew _       = False
 -- | react to keyboard events
 react :: Event -> GameState -> GameState
 -- move bar (left/right)
-react (EventKey (SpecialKey KeyLeft) keystate _ _) (GameState bar ball score level lives blocks Playing)
-  = GameState bar' ball score level lives blocks Playing
+react (EventKey (SpecialKey KeyLeft) keystate _ _) (GameState bar ball score level lives blocks state)
+  = GameState bar' ball' score level lives blocks state
   where (Bar, (pos,(_,dy))) = bar
-        dx'  = if keystate==Down then -300 else 0
-        bar' = (Bar, (pos, (dx',dy)))
-
-react (EventKey (SpecialKey KeyRight) keystate _ _) (GameState bar ball score level lives blocks Playing)
-  = GameState bar' ball score level lives blocks Playing
+        dx'   = if keystate==Down && (isPlaying state || isNew state) then -300 else 0
+        bar'  = (Bar, (pos, (dx',dy)))
+        ball' = if isNew state then (Ball, (pos, (dx',dy))) else ball
+react (EventKey (SpecialKey KeyRight) keystate _ _) (GameState bar ball score level lives blocks state)
+  = GameState bar' ball' score level lives blocks state
   where (Bar, (pos, (_,dy))) = bar
-        dx'  = if keystate==Down then 300 else 0
+        dx'  = if keystate==Down && (isPlaying state || isNew state) then 300 else 0
         bar' = (Bar, (pos, (dx', dy)))
+        ball' = if isNew state then (Ball, (pos, (dx',dy))) else ball
 -- ignore all other keys and events
 react (EventKey (Char 'n') Down _ _) _    = initialState (getVelocity 1) 0 1 3 (genBlocks 1 2.5)
 react (EventKey (Char 'p') Down _ _) (GameState bar ball score level lives blocks Playing)
