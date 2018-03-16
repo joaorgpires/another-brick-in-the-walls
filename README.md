@@ -2,6 +2,14 @@
 
 Breakout is a game where the objective is to destroy and remove all the blocks in the screen using a ball and a bar that can be moved from left to right and from right to left.
 
+Build with:
+
+> stack build
+
+Execute with:
+
+> stack exec breakout
+
 Controls:
 
 &rarr;: Move right
