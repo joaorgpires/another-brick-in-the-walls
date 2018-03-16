@@ -7,12 +7,11 @@ module Breakout.Renderer where
 
 import Graphics.Gloss
 import Breakout.AtomicDefinitions
-import Data.Maybe
 import qualified Data.Map.Lazy as Map
 
 -- | render all entities into a picture
 render :: GameState -> Picture
-render (GameState bar ball score level lives blocks)
+render (GameState bar ball score level lives blocks _)
   = pictures (map renderEnt (bar:ball:score:level:lives:(blocksToList blocks)))
 
 

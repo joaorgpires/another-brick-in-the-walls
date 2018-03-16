@@ -10,19 +10,26 @@ import qualified Data.Map.Lazy as Map
 
 -- | representation for the game state;
 -- player's bar ball score level lives map of (y, blocks centered with yvalue = y)
-data GameState = GameState Entity Entity Entity Entity Entity Blocks
+data GameState = GameState Entity Entity Entity Entity Entity Blocks State
 
-data Shape = Bar        -- ^ bar
-          | Ball        -- ^ ball
-          | Block Float -- ^ block (type)
-          | Score Int   -- ^ score
-          | Level Int   -- ^ level
-          | Lives Int   -- ^ number of lives, initially 3
+data Shape = Bar         -- ^ bar
+           | Ball        -- ^ ball
+           | Block Float -- ^ block (type)
+           | Score Int   -- ^ score
+           | Level Int   -- ^ level
+           | Lives Int   -- ^ number of lives, initially 3
+
+-- | game state - Playing, Paused, NewLife, NewLevel, Lose, Win
+data State = Playing
+           | Paused Vector -- Velocity before pausing
+           | New Vector    -- Velocity to use upon restarting
+           | Lose
+           | Win
 
 -- | coordinates for movement calculations
 -- position, velocity vector
 type Coords = (Point,      -- ^ center position
-               Vector     -- ^ linear velocity
+               Vector      -- ^ linear velocity
               )
 
 type Entity     = (Shape, Coords)
