@@ -122,6 +122,14 @@ hits (Ball,((x,y),_)) (Block row,((x',y'),_))
   = (ballRadius+1/2*blockH >= abs (y'-y)) && (x'-1/2*blockW*row <= x) && (x <= x'+1/2*blockW*row)
 hits _ _ = False
 
+isPlaying :: State -> Bool
+isPlaying Playing = True
+isPlaying _       = False
+
+isNew :: State -> Bool
+isNew (New _) = True
+isNew _       = False
+
 -- | react to keyboard events
 react :: Event -> GameState -> GameState
 -- move bar (left/right)
