@@ -101,18 +101,20 @@ collisions :: GameState -> GameState
 collisions (GameState bar ball score level lives blocks state)
   = GameState bar ball' score' level lives' blocks' state
   where (Ball,((x,y),(dx,dy)))                  = ball
-        (Bar,((_,y'),(_,_)))                    = bar
+        (Bar,((x',y'),(_,_)))                    = bar
         (Score s,((sx,sy),(sdx,sdy)))           = score
         (Lives liv,((livx,livy),(livdx,livdy))) = lives
         ball'
-          | ball `hits` bar                                      = (Ball,((x,y'+1/2*barH+ballRadius),(dx,-dy)))
+          | ball `hits` bar                                      = (Ball,((x,y'+1/2*barH+ballRadius),(dx',-dy)))
           | or (map (\z -> ball `hits` z) (blocksToList blocks)) = (Ball,((x,y),(dx,-dy)))
           | otherwise                                            = (Ball,((x,y),(dx,dy)))
         (s',blocks') = blocksCollisions s ball blocks
         score' = (Score s',((sx,sy),(sdx,sdy)))
         lives' = if (s' /= s && (myFloor (fromIntegral s/1500)) /= (myFloor (fromIntegral s'/1500))) then (Lives (liv+1),((livx,livy),(livdx,livdy)))
                  else lives
-        
+        dx'
+          | (isPlaying state) = if x <= x' then -(abs dx) else (abs dx)
+          | otherwise         = dx
 
 -- | check colision between two entities
 hits :: Entity -> Entity -> Bool
