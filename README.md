@@ -1,4 +1,4 @@
-# Breakout (Version 1.0.0 - Mar 15, 2018)
+# Breakout (Version 1.1.0 - Mar 17, 2018)
 
 Breakout is a game where the objective is to destroy and remove all the blocks in the screen using a ball and a bar that can be moved from left to right and from right to left.
 
