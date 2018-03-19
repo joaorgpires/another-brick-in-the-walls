@@ -16,6 +16,10 @@ Controls:
 
 &larr;: Move left
 
+&uarr; Start level to the left
+
+&darr; Start level to the right (default)
+
 SPACE: Start level/life
 
 P: Pause/unpause
