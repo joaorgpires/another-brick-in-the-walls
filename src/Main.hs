@@ -56,9 +56,9 @@ stop (GameState bar ball score level lives blocks state)
 -- | advance all game entities by a time delta
 advance :: Float -> GameState -> GameState
 advance dt (GameState bar ball score level lives blocks state)
-  | loseState (GameState bar ball score level lives blocks state) = if (liv == 0 || liv == 1) then stop (GameState bar ball score level lives' blocks state)
+  | loseState (GameState bar ball score level lives blocks state) = if (liv == 0 || liv == 1) then (GameState bar ball score level lives blocks Lose) --stop (GameState bar ball score level lives' blocks state)
                                                                     else initialState (getVelocity lev) sc lev (liv - 1) blocks
-  | Map.null blocks = if lev == 5 then stop (GameState bar ball score level lives blocks state)
+  | Map.null blocks = if lev == 5 then (GameState bar ball score level lives blocks Win) -- stop (GameState bar ball score level lives blocks state)
                       else initialState (getVelocity (lev+1)) sc (lev + 1) liv (genBlocks (lev+1) 2.5)
   | otherwise       = GameState (advanceEnt state dt bar) (advanceEnt state dt ball) score level lives blocks state
   where (Score sc,_)                            = score
@@ -147,8 +147,7 @@ react (EventKey (SpecialKey KeyRight) keystate _ _) (GameState bar ball score le
         dx'  = if keystate==Down && (isPlaying state || isNew state) then 300 else 0
         bar' = (Bar, (pos, (dx', dy)))
         ball' = if isNew state then (Ball, (pos, (dx',dy))) else ball
--- ignore all other keys and events
-react (EventKey (Char 'n') Down _ _) _    = initialState (getVelocity 1) 0 1 3 (genBlocks 1 2.5)
+react (EventKey (Char 'n') Down _ _) _    = firstLevel
 react (EventKey (Char 'p') Down _ _) (GameState bar ball score level lives blocks Playing)
   = GameState bar' ball' score level lives blocks (Paused (dx',dy'))
   where (Bar,((x,y),(_,_)))        = bar
@@ -163,6 +162,11 @@ react (EventKey (SpecialKey KeySpace) Down _ _) (GameState bar ball score level 
   = GameState bar ball' score level lives blocks Playing
   where (Ball, ((x,y),_)) = ball
         ball' = (Ball, ((x,y),(dx,dy)))
+react (EventKey (SpecialKey KeyDown) Down _ _) (GameState bar ball score level lives blocks (New (dx,dy))) -- start to the right
+  = GameState bar ball score level lives blocks (New (abs(dx),dy))
+react (EventKey (SpecialKey KeyUp) Down _ _) (GameState bar ball score level lives blocks (New (dx,dy))) -- start to the left
+  = GameState bar ball score level lives blocks (New (-abs(dx),dy))
+  -- ignore all other keys and events
 react _ world                             = world
 
 -- | frames per second for game event loop
@@ -175,8 +179,8 @@ initialState (dx,dy) sc lev liv blocks = GameState bar ball score level lives bl
   where
     bar   = (Bar, ((0,-350), (0,0)))
     ball  = (Ball, ((0,-330), (0,0)))
-    score = (Score sc, ((600,-390),(0,0)))
-    level = (Level lev, ((0,-390),(0,0)))
+    score = (Score sc, ((510,-390),(0,0)))
+    level = (Level lev, ((-35,-390),(0,0)))
     lives = (Lives liv, ((-600,-390),(0,0)))
 
 getBlock :: Float -> Float -> Float -> Entity
@@ -206,10 +210,13 @@ genBlocks lvl n = if (fromIntegral (6-lvl))*0.5 > n then Map.empty
 getVelocity :: Int -> Vector
 getVelocity lvl = (180 + (fromIntegral (lvl - 1)) * 20,180 + (fromIntegral (lvl - 1)) * 20)
 
+firstLevel :: GameState
+firstLevel = initialState (getVelocity 1) 0 1 3 (genBlocks 1 2.5)
+
 -- | main entry point
 main :: IO ()
 main = do
- play window black fps (initialState (getVelocity 1) 0 1 3 (genBlocks 1 2.5)) render react update
+  play window black fps firstLevel render react update
 
 window :: Display
 window = InWindow "Breakout" (2*round maxWidth,2*round maxHeight) (0,0)

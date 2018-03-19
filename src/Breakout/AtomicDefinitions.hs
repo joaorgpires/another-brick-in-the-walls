@@ -18,6 +18,9 @@ data Shape = Bar         -- ^ bar
            | Score Int   -- ^ score
            | Level Int   -- ^ level
            | Lives Int   -- ^ number of lives, initially 3
+           | Loser       -- ^ loser text
+           | Winner      -- ^ winner text
+           | Controls    -- ^ controls text
 
 -- | game state - Playing, Paused, NewLife, NewLevel, Lose, Win
 data State = Playing
