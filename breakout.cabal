@@ -18,7 +18,7 @@ executable breakout
   main-is:             Main.hs
   other-modules:       Breakout.AtomicDefinitions,
                        Breakout.Renderer,
-                       Breakout.Scoring
+                       Breakout.Game
   default-language:    Haskell2010
   build-depends:       base >= 4.7 && < 5,
                        gloss,
