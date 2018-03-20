@@ -3,7 +3,7 @@
   João Rebelo Pires, 2018
 -}
 
-module Breakout.Scoring where
+module Breakout.Game where
 
 import Graphics.Gloss
 

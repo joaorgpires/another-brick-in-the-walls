@@ -12,7 +12,7 @@ import Data.Maybe as Maybe
 
 import Breakout.AtomicDefinitions
 import Breakout.Renderer
-import Breakout.Scoring
+import Breakout.Game
 
 -- | advance ball coordinates by a time delta
 advanceBall :: State -> Float -> Float -> Coords -> Coords
