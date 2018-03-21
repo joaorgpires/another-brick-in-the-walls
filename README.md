@@ -1,4 +1,4 @@
-# Breakout (Version 1.2.0 - Mar 21, 2018)
+# Another brick in the Walls (Version 1.2.0 - Mar 21, 2018)
 
 Breakout is a game where the objective is to destroy and remove all the blocks in the screen using a ball and a bar that can be moved from left to right and from right to left.
 
