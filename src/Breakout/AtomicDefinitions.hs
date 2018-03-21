@@ -12,6 +12,7 @@ import qualified Data.Map.Lazy as Map
 -- player's bar ball score level lives map of (y, blocks centered with yvalue = y)
 data GameState = GameState Entity Entity Entity Entity Entity Blocks State
 
+-- | each game object shape data
 data Shape = Bar         -- ^ bar
            | Ball        -- ^ ball
            | Block Float -- ^ block (type)
@@ -23,11 +24,11 @@ data Shape = Bar         -- ^ bar
            | Controls    -- ^ controls text
 
 -- | game state - Playing, Paused, New, Lose, Win
-data State = Playing       -- 
+data State = Playing       -- Playing state -- ball moving
            | Paused Vector -- Velocity before pausing
            | New Vector    -- Velocity to use upon restarting
-           | Lose          -- 
-           | Win
+           | Lose          -- Player lost
+           | Win           -- Player won
 
 -- | coordinates for movement calculations
 -- position, velocity vector
@@ -35,10 +36,11 @@ type Coords = (Point,      -- ^ center position
                Vector      -- ^ linear velocity
               )
 
+-- | entity that has some shape and some coords for positioning
 type Entity     = (Shape, Coords)
 
-type Dimensions = (Float, Float) -- dimensions for blocks
-
+-- | type for the blocks storage
+-- mapping some y to a list of blocks placed at that y
 type Blocks = Map.Map Float [Entity]
 
 -- | objects dimensions
@@ -66,14 +68,17 @@ maxHeight = 400
 vxi       = 180
 vyi       = 180
 
+-- | test of the state is Playing
 isPlaying :: State -> Bool
 isPlaying Playing = True
 isPlaying _       = False
 
+-- | test of the state is New
 isNew :: State -> Bool
 isNew (New _) = True
 isNew _       = False
 
+-- | simple floor function to avoid warnings
 myFloor :: Float -> Int
 myFloor x = floor x
 

@@ -25,7 +25,9 @@ react (EventKey (SpecialKey KeyRight) keystate _ _) (GameState bar ball score le
         dx'  = if keystate==Down && (isPlaying state || isNew state) then 300 else 0
         bar' = (Bar, (pos, (dx', dy)))
         ball' = if isNew state then (Ball, (pos, (dx',dy))) else ball
+-- new game (star at level 1) -- key n
 react (EventKey (Char 'n') Down _ _) _    = firstLevel
+-- pause or unpause the game -- key p
 react (EventKey (Char 'p') Down _ _) (GameState bar ball score level lives blocks Playing)
   = GameState bar' ball' score level lives blocks (Paused (dx',dy'))
   where (Bar,((x,y),(_,_)))        = bar
@@ -36,6 +38,7 @@ react (EventKey (Char 'p') Down _ _) (GameState bar ball score level lives block
   = GameState bar ball' score level lives blocks Playing
   where (Ball,((x,y),_)) = ball
         ball' = (Ball,((x,y),(dx,dy)))
+-- start level/life -- space
 react (EventKey (SpecialKey KeySpace) Down _ _) (GameState bar ball score level lives blocks (New (dx,dy)))
   = GameState bar ball' score level lives blocks Playing
   where (Ball, ((x,y),_)) = ball
