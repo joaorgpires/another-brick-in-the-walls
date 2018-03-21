@@ -157,4 +157,4 @@ getVelocity :: Int -> Vector
 getVelocity lvl = (vxi + (fromIntegral (lvl - 1)) * 20,vyi + (fromIntegral (lvl - 1)) * 20)
 
 firstLevel :: GameState
-firstLevel = initialState (getVelocity 5) 0 5 3 (genBlocks 5 2.5)
+firstLevel = initialState (getVelocity 1) 0 1 3 (genBlocks 1 2.5)
