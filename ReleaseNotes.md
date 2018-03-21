@@ -1,3 +1,9 @@
+## Version 1.2.0 (Mar 21, 2018)
+
+The following mechanics were added:
+1. On each life/level start, one can chose with up/down arrows the initial direction of the ball.
+1. New dimensions screen (800*400) is also now available at release-800-400.
+
 ## Version 1.1.0 (Mar 17, 2018)
 
 The following mechanics were added:
