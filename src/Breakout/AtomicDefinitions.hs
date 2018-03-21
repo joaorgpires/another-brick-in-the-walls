@@ -43,11 +43,11 @@ type Blocks = Map.Map Float [Entity]
 
 -- | objects dimensions
 ballRadius, barW, barH, blockW, blockH :: Float
-ballRadius = 10
-barW       = 80
-barH       = 20
-blockW     = 80
-blockH     = 20
+ballRadius = 5
+barW       = 40
+barH       = 10
+blockW     = 40
+blockH     = 10
 
 -- | base score
 baseScore :: Int
@@ -61,10 +61,10 @@ block = rectangleSolid blockW blockH
 
 -- | display dimensions
 maxWidth, maxHeight, vxi, vyi :: Float
-maxWidth  = 800
-maxHeight = 400
-vxi       = 180
-vyi       = 180
+maxWidth  = 400
+maxHeight = 200
+vxi       = 100
+vyi       = 100
 
 isPlaying :: State -> Bool
 isPlaying Playing = True

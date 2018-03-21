@@ -58,7 +58,7 @@ advance dt (GameState bar ball score level lives blocks state)
   | loseState (GameState bar ball score level lives blocks state) = if (liv == 1) then (GameState bar ball score level lives blocks Lose)
                                                                     else initialState (getVelocity lev) sc lev (liv - 1) blocks
   | Map.null blocks = if lev == 5 then (GameState bar ball score level lives blocks Win)
-                      else initialState (getVelocity (lev+1)) sc (lev + 1) liv (genBlocks (lev+1) 2.5)
+                      else initialState (getVelocity (lev+1)) sc (lev + 1) liv (genBlocks (lev+1) 3)
   | otherwise       = GameState (advanceEnt state dt bar) (advanceEnt state dt ball) score level lives blocks state
   where (Score sc,_)                            = score
         (Level lev,_) = level
@@ -126,11 +126,11 @@ hits _ _ = False
 initialState :: Vector -> Int -> Int -> Int -> Blocks -> GameState
 initialState (dx,dy) sc lev liv blocks = GameState bar ball score level lives blocks (New (dx,dy))
   where
-    bar   = (Bar, ((0,-350), (0,0)))
-    ball  = (Ball, ((0,-330), (0,0)))
-    score = (Score sc, ((510,-390),(0,0)))
-    level = (Level lev, ((-35,-390),(0,0)))
-    lives = (Lives liv, ((-600,-390),(0,0)))
+    bar   = (Bar, ((0,-350/2), (0,0)))
+    ball  = (Ball, ((0,-330/2), (0,0)))
+    score = (Score sc, ((510/2,-390/2),(0,0)))
+    level = (Level lev, ((-35/2,-390/2),(0,0)))
+    lives = (Lives liv, ((-600/2,-390/2),(0,0)))
 
 getBlock :: Float -> Float -> Float -> Entity
 getBlock row x y
@@ -138,13 +138,13 @@ getBlock row x y
 
 genRow :: Int -> Float -> (Float, [Entity])
 genRow nb row = (y, map (\x -> getBlock row x y) [-maxWidth + blockSize / 2, -maxWidth + blockSize + intervalSize + blockSize / 2..maxWidth])
-  where y             = maxHeight - 25 - 3 * (row * 50) - (fromIntegral nb)*25
+  where y             = maxHeight - 25/2 - 3 * (row * 50/2) - (fromIntegral nb)*25/2
         blockSize     = row * blockW
         nblocks       = myFloor (2*maxWidth / blockSize - 1)
         intervalSize  = (2*maxWidth - fromIntegral nblocks*blockSize) / (fromIntegral nblocks - 1)
 
 genBlocks :: Int -> Float -> Blocks
-genBlocks lvl n = if (fromIntegral (6-lvl))*0.5 > n then Map.empty
+genBlocks lvl n = if (fromIntegral (6-lvl))*0.5 + 0.5 > n then Map.empty
                   else m1
   where (y1, blockList1) = genRow 1 n
         (y2, blockList2) = genRow 2 n
@@ -154,7 +154,7 @@ genBlocks lvl n = if (fromIntegral (6-lvl))*0.5 > n then Map.empty
         m1 = Map.insert y1 blockList1 m2
 
 getVelocity :: Int -> Vector
-getVelocity lvl = (vxi + (fromIntegral (lvl - 1)) * 20,vyi + (fromIntegral (lvl - 1)) * 20)
+getVelocity lvl = (vxi + (fromIntegral (lvl - 1)) * 10,vyi + (fromIntegral (lvl - 1)) * 10)
 
 firstLevel :: GameState
-firstLevel = initialState (getVelocity 5) 0 5 3 (genBlocks 5 2.5)
+firstLevel = initialState (getVelocity 1) 0 1 3 (genBlocks 1 3)

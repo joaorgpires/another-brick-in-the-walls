@@ -16,13 +16,13 @@ react :: Event -> GameState -> GameState
 react (EventKey (SpecialKey KeyLeft) keystate _ _) (GameState bar ball score level lives blocks state)
   = GameState bar' ball' score level lives blocks state
   where (Bar, (pos,(_,dy))) = bar
-        dx'   = if keystate==Down && (isPlaying state || isNew state) then -300 else 0
+        dx'   = if keystate==Down && (isPlaying state || isNew state) then -150 else 0
         bar'  = (Bar, (pos, (dx',dy)))
         ball' = if isNew state then (Ball, (pos, (dx',dy))) else ball
 react (EventKey (SpecialKey KeyRight) keystate _ _) (GameState bar ball score level lives blocks state)
   = GameState bar' ball' score level lives blocks state
   where (Bar, (pos, (_,dy))) = bar
-        dx'  = if keystate==Down && (isPlaying state || isNew state) then 300 else 0
+        dx'  = if keystate==Down && (isPlaying state || isNew state) then 150 else 0
         bar' = (Bar, (pos, (dx', dy)))
         ball' = if isNew state then (Ball, (pos, (dx',dy))) else ball
 react (EventKey (Char 'n') Down _ _) _    = firstLevel
