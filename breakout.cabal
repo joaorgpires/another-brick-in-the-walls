@@ -1,5 +1,5 @@
 name:                breakout
-version:             1.1.0
+version:             1.2.0
 -- synopsis:
 -- description:
 homepage:            https://github.com/jrbartowski/breakout.git
@@ -18,7 +18,8 @@ executable breakout
   main-is:             Main.hs
   other-modules:       Breakout.AtomicDefinitions,
                        Breakout.Renderer,
-                       Breakout.Game
+                       Breakout.Game,
+                       Breakout.Keys
   default-language:    Haskell2010
   build-depends:       base >= 4.7 && < 5,
                        gloss,
