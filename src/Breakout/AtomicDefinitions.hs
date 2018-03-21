@@ -22,11 +22,11 @@ data Shape = Bar         -- ^ bar
            | Winner      -- ^ winner text
            | Controls    -- ^ controls text
 
--- | game state - Playing, Paused, NewLife, NewLevel, Lose, Win
-data State = Playing
+-- | game state - Playing, Paused, New, Lose, Win
+data State = Playing       -- 
            | Paused Vector -- Velocity before pausing
            | New Vector    -- Velocity to use upon restarting
-           | Lose
+           | Lose          -- 
            | Win
 
 -- | coordinates for movement calculations
@@ -60,6 +60,23 @@ ball  = circleSolid ballRadius
 block = rectangleSolid blockW blockH
 
 -- | display dimensions
-maxWidth, maxHeight :: Float
+maxWidth, maxHeight, vxi, vyi :: Float
 maxWidth  = 800
 maxHeight = 400
+vxi       = 180
+vyi       = 180
+
+isPlaying :: State -> Bool
+isPlaying Playing = True
+isPlaying _       = False
+
+isNew :: State -> Bool
+isNew (New _) = True
+isNew _       = False
+
+myFloor :: Float -> Int
+myFloor x = floor x
+
+-- | frames per second for game event loop
+fps :: Int
+fps = 60
